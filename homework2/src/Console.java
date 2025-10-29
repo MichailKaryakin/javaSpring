@@ -29,4 +29,34 @@ public class Console {
             }
         }
     }
+
+    public int askId() {
+        System.out.println("Введите id студента");
+        return scanner.nextInt();
+    }
+
+    public String askName() {
+        System.out.println("Введите имя студента");
+        return scanner.nextLine();
+    }
+
+    public String askSurname() {
+        System.out.println("Введите фамилию студента");
+        return scanner.nextLine();
+    }
+
+    public int askAge() {
+        System.out.println("Введите возраст студента");
+        return scanner.nextInt();
+    }
+
+    public String askEmail() {
+        System.out.println("Введите эл. почту студента");
+        return scanner.nextLine();
+    }
+
+    public String askPhone() {
+        System.out.println("Введите телефон студента");
+        return scanner.nextLine();
+    }
 }

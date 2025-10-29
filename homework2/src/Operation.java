@@ -2,6 +2,8 @@ public class Operation {
     private final int operationId;
 
     private final Database database = new Database();
+    
+    private final Console console = new Console();
 
     public Operation(int operationId) {
         this.operationId = operationId;
@@ -40,19 +42,38 @@ public class Operation {
     }
 
     private String showStudents() {
-        return "";
+        return database.getStudentsList();
     }
 
     private String findStudent() {
-        return "";
+        int id = console.askId();
+        Student student = database.studentById(id);
+        if (student != null) {
+            return student.toString();
+        } else {
+            return "Студента с таким идентификатором не найдено";
+        }
     }
 
     private String addStudent() {
-        return "";
+        Student student = new Student();
+        student.setAge(console.askAge());
+        student.setName(console.askName());
+        student.setSurname(console.askSurname());
+        student.setEmail(console.askEmail());
+        student.setPhone(console.askPhone());
+        return database.addStudent(student);
     }
 
     private String updateStudent() {
-        return "";
+        int id = console.askId();
+        Student student = database.studentById(id);
+        student.setAge(console.askAge());
+        student.setName(console.askName());
+        student.setSurname(console.askSurname());
+        student.setEmail(console.askEmail());
+        student.setPhone(console.askPhone());
+        return "Студент успешно обновлён";
     }
 
     private String deleteStudent() {

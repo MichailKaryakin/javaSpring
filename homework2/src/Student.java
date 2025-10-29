@@ -1,5 +1,5 @@
 public class Student {
-    private final int id;
+    private int id;
     private String name;
     private String surname;
     private int age;
@@ -12,6 +12,10 @@ public class Student {
         this.surname = surname;
         this.age = age;
         this.email = email;
+    }
+
+    public Student() {
+
     }
 
     public int getId() {

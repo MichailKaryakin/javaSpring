@@ -6,13 +6,36 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Database {
-    private final String url = "jdbc:mysql://localhost:3306/Java521";
-    private final String username = "root";
-    private final String password = "root";
-    private List<Student> students;
+    private final String url = "";
+    private final String username = "";
+    private final String password = "";
+    private final List<Student> students;
 
     public Database() {
         this.students = getStudents();
+    }
+
+    public String getStudentsList() {
+        StringBuilder info = new StringBuilder();
+        for (Student student : students) {
+            info.append(student);
+            info.append('\n');
+        }
+        return info.toString();
+    }
+
+    public Student studentById(int id) {
+        for (Student student : students) {
+            if (student.getId() == id) {
+                return student;
+            }
+        }
+        return null;
+    }
+
+    public String addStudent(Student student) {
+        students.add(student);
+        return "студент добавлен";
     }
 
     private static List<Student> getStudents() {
