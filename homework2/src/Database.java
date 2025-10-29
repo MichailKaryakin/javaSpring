@@ -38,13 +38,9 @@ public class Database {
         return "студент добавлен";
     }
 
-    private static List<Student> getStudents() {
+    private List<Student> getStudents() {
         List<Student> students = new ArrayList<>();
         try {
-            String url = "jdbc:mysql://localhost:3306/Java521";
-            String username = "root";
-            String password = "root";
-
             String sqlQuery = "SELECT * FROM Students";
 
             try (Connection connection = DriverManager.getConnection(url, username, password)) {
