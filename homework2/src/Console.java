@@ -3,60 +3,101 @@ import java.util.Scanner;
 public class Console {
     private boolean running = true;
     private final Scanner scanner = new Scanner(System.in);
+    private final Database database;
+
+    public Console(Database database) {
+        this.database = database;
+    }
 
     public void run() {
         while (running) {
-            System.out.println("""
-                    1. Показать всех студентов
-                    2. Найти студента по ID
-                    3. Добавить нового студента
-                    4. Обновить данные студента
-                    5. Удалить студента
-                    6. Поиск по имени/фамилии
-                    7. Поиск по email
-                    8. Фильтр по возрасту
-                    0. Выход
-                    """);
-            int operationId = scanner.nextInt();
+            printMenu();
+            int operationId = askMenuOption();
+
             if (operationId == 0) {
                 running = false;
-            } else if (operationId > 0 && operationId <= 8) {
-                Database database = new Database();
-                Operation operation = new Operation(1, database);
-                System.out.println(operation.implement());
-            } else {
-                System.out.println("Такого пункта не существует, повторите ввод");
+                System.out.println("Выход из программы...");
+                continue;
             }
+
+            if (operationId < 0 || operationId > 8) {
+                System.out.println("Такого пункта не существует, повторите ввод");
+                continue;
+            }
+
+            Operation operation = new Operation(operationId, database);
+            System.out.println(operation.implement());
+            System.out.println("\n----------------------------------\n");
         }
     }
 
+    private void printMenu() {
+        System.out.println("""
+                -----------------------------
+                Меню:
+                1. Показать всех студентов
+                2. Найти студента по ID
+                3. Добавить нового студента
+                4. Обновить данные студента
+                5. Удалить студента
+                6. Поиск по имени/фамилии
+                7. Поиск по email
+                8. Фильтр по возрасту
+                0. Выход
+                -----------------------------
+                """);
+    }
+
+    private int askMenuOption() {
+        System.out.print("Введите номер операции: ");
+        while (!scanner.hasNextInt()) {
+            System.out.println("Введите корректное число!");
+            scanner.nextLine(); // очищаем ввод
+        }
+        int option = scanner.nextInt();
+        scanner.nextLine(); // съедаем перевод строки
+        return option;
+    }
+
     public int askId() {
-        System.out.println("Введите id студента");
-        return scanner.nextInt();
+        System.out.print("Введите id студента: ");
+        while (!scanner.hasNextInt()) {
+            System.out.println("Введите корректное число!");
+            scanner.nextLine();
+        }
+        int id = scanner.nextInt();
+        scanner.nextLine();
+        return id;
     }
 
     public String askName() {
-        System.out.println("Введите имя студента");
-        return scanner.nextLine();
+        System.out.print("Введите имя студента: ");
+        return scanner.nextLine().trim();
     }
 
     public String askSurname() {
-        System.out.println("Введите фамилию студента");
-        return scanner.nextLine();
+        System.out.print("Введите фамилию студента: ");
+        return scanner.nextLine().trim();
     }
 
     public int askAge() {
-        System.out.println("Введите возраст студента");
-        return scanner.nextInt();
+        System.out.print("Введите возраст студента: ");
+        while (!scanner.hasNextInt()) {
+            System.out.println("Введите корректное число!");
+            scanner.nextLine();
+        }
+        int age = scanner.nextInt();
+        scanner.nextLine();
+        return age;
     }
 
     public String askEmail() {
-        System.out.println("Введите эл. почту студента");
-        return scanner.nextLine();
+        System.out.print("Введите эл. почту студента: ");
+        return scanner.nextLine().trim();
     }
 
     public String askPhone() {
-        System.out.println("Введите телефон студента");
-        return scanner.nextLine();
+        System.out.print("Введите телефон студента: ");
+        return scanner.nextLine().trim();
     }
 }

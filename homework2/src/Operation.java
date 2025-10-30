@@ -1,11 +1,12 @@
 public class Operation {
     private final int operationId;
     private final Database database;
-    private final Console console = new Console();
+    private final Console console;
 
     public Operation(int operationId, Database database) {
         this.operationId = operationId;
         this.database = database;
+        this.console = new Console(database); // теперь корректно
     }
 
     public String implement() {
