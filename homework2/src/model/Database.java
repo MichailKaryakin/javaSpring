@@ -14,10 +14,24 @@ public class Database {
     private final String password = "root";
     private final List<Student> students;
 
+    private static String getProperInsert(Student student) {
+        String sqlQuery = "INSERT INTO Students (Id, Name, Surname, Age, Email) VALUES ("
+                + student.getId() + ", '"
+                + student.getName() + "', '" + student.getSurname() + "', '"
+                + student.getAge() + "', '" + student.getEmail() + "')";
+        if (student.getPhone() != null) {
+            sqlQuery = "INSERT INTO Students (Id, Name, Surname, Age, Email, Phone) VALUES ("
+                    + student.getId() + ", '" + student.getName()
+                    + "', '" + student.getSurname() + "', '" + student.getAge()
+                    + "', '" + student.getEmail() + "', '" + student.getPhone() + "')";
+        }
+        return sqlQuery;
+    }
+
     private List<Student> getStudents() {
         List<Student> students = new ArrayList<>();
         try {
-            String sqlQuery = "SELECT * FROM students";
+            String sqlQuery = "SELECT * FROM Students";
 
             try (Connection connection = DriverManager.getConnection(url, username, password);
                  Statement statement = connection.createStatement();
@@ -36,7 +50,7 @@ public class Database {
                 }
             }
         } catch (Exception e) {
-            System.out.println("Плохое соединение или ошибка селекта");
+            System.out.println(e.getMessage());
         }
 
         return students;
@@ -64,19 +78,6 @@ public class Database {
         return null;
     }
 
-    public String addStudent(Student student) {
-        students.add(student);
-        return "Студент добавлен";
-    }
-
-    public String deleteStudent(int id) {
-        if (students.removeIf(student -> student.getId() == id)) {
-            return "Студент был удалён";
-        } else {
-            return "Студента с таким идентификатором не найдено";
-        }
-    }
-
     public Student findByName(String name) {
         for (Student student : students) {
             if (Objects.equals(student.getName(), name)) {
@@ -98,10 +99,43 @@ public class Database {
     public String ageFilter(int age) {
         StringBuilder result = new StringBuilder();
         for (Student student : students) {
-            if (student.getAge() == age) {
+            if (student.getAge() >= age) {
                 result.append(student).append('\n');
             }
         }
         return result.toString();
+    }
+
+    public String addStudent(Student student) {
+        students.add(student);
+        try {
+            String sqlQuery = getProperInsert(student);
+
+            try (Connection connection = DriverManager.getConnection(url, username, password);
+                 Statement statement = connection.createStatement();
+                 ResultSet resultSet = statement.executeQuery(sqlQuery)) {
+                resultSet.next();
+                students.add(student);
+                return "Студент добавлен";
+            }
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+
+    public String deleteStudent(int id) {
+        try {
+            String sqlQuery = "DELETE FROM Students WHERE Id = " + id;
+
+            try (Connection connection = DriverManager.getConnection(url, username, password);
+                 Statement statement = connection.createStatement();
+                 ResultSet resultSet = statement.executeQuery(sqlQuery)) {
+                resultSet.next();
+                students.removeIf(student -> student.getId() == id);
+                return "Студент удалён";
+            }
+        } catch (Exception e) {
+            return e.getMessage();
+        }
     }
 }
