@@ -1,3 +1,9 @@
+package controller;
+
+import model.Database;
+import model.Student;
+import view.Console;
+
 public class Operation {
     private final int operationId;
     private final Database database;
@@ -6,7 +12,7 @@ public class Operation {
     public Operation(int operationId, Database database) {
         this.operationId = operationId;
         this.database = database;
-        this.console = new Console(database); // теперь корректно
+        this.console = new Console(database);
     }
 
     public String implement() {

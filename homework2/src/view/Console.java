@@ -1,3 +1,8 @@
+package view;
+
+import controller.Operation;
+import model.Database;
+
 import java.util.Scanner;
 
 public class Console {
