@@ -1,44 +1,25 @@
 public class Operation {
     private final int operationId;
-
-    private final Database database = new Database();
-    
+    private final Database database;
     private final Console console = new Console();
 
-    public Operation(int operationId) {
+    public Operation(int operationId, Database database) {
         this.operationId = operationId;
+        this.database = database;
     }
 
     public String implement() {
-        switch (operationId) {
-            case 1 -> {
-                return showStudents();
-            }
-            case 2 -> {
-                return findStudent();
-            }
-            case 3 -> {
-                return addStudent();
-            }
-            case 4 -> {
-                return updateStudent();
-            }
-            case 5 -> {
-                return deleteStudent();
-            }
-            case 6 -> {
-                return findByName();
-            }
-            case 7 -> {
-                return findByEmail();
-            }
-            case 8 -> {
-                return ageFilter();
-            }
-            default -> {
-                return "Что-то пошло не так";
-            }
-        }
+        return switch (operationId) {
+            case 1 -> showStudents();
+            case 2 -> findStudent();
+            case 3 -> addStudent();
+            case 4 -> updateStudent();
+            case 5 -> deleteStudent();
+            case 6 -> findByName();
+            case 7 -> findByEmail();
+            case 8 -> ageFilter();
+            default -> "Что-то пошло не так";
+        };
     }
 
     private String showStudents() {
@@ -68,6 +49,9 @@ public class Operation {
     private String updateStudent() {
         int id = console.askId();
         Student student = database.studentById(id);
+        if (student == null) {
+            return "Студент с таким идентификатором не найден";
+        }
         student.setAge(console.askAge());
         student.setName(console.askName());
         student.setSurname(console.askSurname());
@@ -77,18 +61,30 @@ public class Operation {
     }
 
     private String deleteStudent() {
-        return "";
+        int id = console.askId();
+        return database.deleteStudent(id);
     }
 
     private String findByName() {
-        return "";
+        String name = console.askName();
+        Student student = database.findByName(name);
+        if (student == null) {
+            return "Студента с таким именем не найдено";
+        }
+        return student.toString();
     }
 
     private String findByEmail() {
-        return "";
+        String email = console.askEmail();
+        Student student = database.findByEmail(email);
+        if (student == null) {
+            return "Студента с таким email не найдено";
+        }
+        return student.toString();
     }
 
     private String ageFilter() {
-        return "";
+        int age = console.askAge();
+        return database.ageFilter(age);
     }
 }

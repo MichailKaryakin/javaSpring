@@ -21,9 +21,9 @@ public class Console {
             if (operationId == 0) {
                 running = false;
             } else if (operationId > 0 && operationId <= 8) {
-                Operation operation = new Operation(operationId);
-                String result = operation.implement();
-                System.out.println(result);
+                Database database = new Database();
+                Operation operation = new Operation(1, database);
+                System.out.println(operation.implement());
             } else {
                 System.out.println("Такого пункта не существует, повторите ввод");
             }
