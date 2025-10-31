@@ -20,13 +20,14 @@ public class Database {
                  ResultSet resultSet = statement.executeQuery(sqlQuery)) {
                 if (resultSet.next()) {
                     return resultSet.getInt(1);
+                } else {
+                    return -1;
                 }
             }
         } catch (Exception e) {
             System.out.println("Текущий максимальный идентификатор не получен");
             return -1;
         }
-        return -1;
     }
 
     private List<Student> getStudents() {
@@ -120,11 +121,14 @@ public class Database {
                 preparedStatement.setString(5, student.getEmail());
                 preparedStatement.setString(6, student.getPhone());
                 preparedStatement.executeUpdate();
+
+                students.clear();
+                students.addAll(getStudents());
+                return "Студент добавлен";
             }
         } catch (Exception e) {
             return "Студент не добавлен";
         }
-        return "Студент не добавлен";
     }
 
     public String deleteStudent(int id) {
