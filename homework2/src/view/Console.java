@@ -30,7 +30,7 @@ public class Console {
                 continue;
             }
 
-            Operation operation = new Operation(operationId, database);
+            Operation operation = new Operation(operationId, database, this);
             System.out.println(operation.implement());
             System.out.println("\n----------------------------------\n");
         }
@@ -45,7 +45,7 @@ public class Console {
                 3. Добавить нового студента
                 4. Обновить данные студента
                 5. Удалить студента
-                6. Поиск по имени/фамилии
+                6. Поиск по имени
                 7. Поиск по email
                 8. Фильтр по возрасту
                 0. Выход

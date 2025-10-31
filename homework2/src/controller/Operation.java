@@ -4,17 +4,7 @@ import model.Database;
 import model.Student;
 import view.Console;
 
-public class Operation {
-    private final int operationId;
-    private final Database database;
-    private final Console console;
-
-    public Operation(int operationId, Database database) {
-        this.operationId = operationId;
-        this.database = database;
-        this.console = new Console(database);
-    }
-
+public record Operation(int operationId, Database database, Console console) {
     public String implement() {
         return switch (operationId) {
             case 1 -> showStudents();
@@ -55,16 +45,13 @@ public class Operation {
 
     private String updateStudent() {
         int id = console.askId();
-        Student student = database.studentById(id);
-        if (student == null) {
-            return "Студент с таким идентификатором не найден";
-        }
+        Student student = new Student();
         student.setAge(console.askAge());
         student.setName(console.askName());
         student.setSurname(console.askSurname());
         student.setEmail(console.askEmail());
         student.setPhone(console.askPhone());
-        return "Студент успешно обновлён";
+        return database.updateStudent(id, student);
     }
 
     private String deleteStudent() {

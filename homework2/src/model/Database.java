@@ -1,9 +1,6 @@
 package model;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -14,18 +11,22 @@ public class Database {
     private final String password = "root";
     private final List<Student> students;
 
-    private static String getProperInsert(Student student) {
-        String sqlQuery = "INSERT INTO Students (Id, Name, Surname, Age, Email) VALUES ("
-                + student.getId() + ", '"
-                + student.getName() + "', '" + student.getSurname() + "', '"
-                + student.getAge() + "', '" + student.getEmail() + "')";
-        if (student.getPhone() != null) {
-            sqlQuery = "INSERT INTO Students (Id, Name, Surname, Age, Email, Phone) VALUES ("
-                    + student.getId() + ", '" + student.getName()
-                    + "', '" + student.getSurname() + "', '" + student.getAge()
-                    + "', '" + student.getEmail() + "', '" + student.getPhone() + "')";
+    private int getMaxId() {
+        try {
+            String sqlQuery = "Select MAX(Id) from Students";
+
+            try (Connection connection = DriverManager.getConnection(url, username, password);
+                 Statement statement = connection.createStatement();
+                 ResultSet resultSet = statement.executeQuery(sqlQuery)) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Текущий максимальный идентификатор не получен");
+            return -1;
         }
-        return sqlQuery;
+        return -1;
     }
 
     private List<Student> getStudents() {
@@ -50,7 +51,7 @@ public class Database {
                 }
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println("Список студентов не считан из базы");
         }
 
         return students;
@@ -107,20 +108,23 @@ public class Database {
     }
 
     public String addStudent(Student student) {
-        students.add(student);
         try {
-            String sqlQuery = getProperInsert(student);
-
+            String sqlQuery = "INSERT INTO Students (Id, Name, Surname, Age, Email, Phone) VALUES (?, ?, ?, ?, ?, ?)";
             try (Connection connection = DriverManager.getConnection(url, username, password);
-                 Statement statement = connection.createStatement();
-                 ResultSet resultSet = statement.executeQuery(sqlQuery)) {
-                resultSet.next();
-                students.add(student);
-                return "Студент добавлен";
+                 PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
+
+                preparedStatement.setInt(1, getMaxId() + 1);
+                preparedStatement.setString(2, student.getName());
+                preparedStatement.setString(3, student.getSurname());
+                preparedStatement.setInt(4, student.getAge());
+                preparedStatement.setString(5, student.getEmail());
+                preparedStatement.setString(6, student.getPhone());
+                preparedStatement.executeUpdate();
             }
         } catch (Exception e) {
-            return e.getMessage();
+            return "Студент не добавлен";
         }
+        return "Студент не добавлен";
     }
 
     public String deleteStudent(int id) {
@@ -128,14 +132,36 @@ public class Database {
             String sqlQuery = "DELETE FROM Students WHERE Id = " + id;
 
             try (Connection connection = DriverManager.getConnection(url, username, password);
-                 Statement statement = connection.createStatement();
-                 ResultSet resultSet = statement.executeQuery(sqlQuery)) {
-                resultSet.next();
+                 Statement statement = connection.createStatement()) {
+                statement.executeUpdate(sqlQuery);
                 students.removeIf(student -> student.getId() == id);
                 return "Студент удалён";
             }
         } catch (Exception e) {
-            return e.getMessage();
+            return "Студент не удалён";
+        }
+    }
+
+    public String updateStudent(int id, Student student) {
+        try {
+            String sqlQuery = "UPDATE Students SET Name = ?, Surname = ?, Age = ?, Email = ?, Phone = ? WHERE Id = ?";
+
+            try (Connection connection = DriverManager.getConnection(url, username, password);
+                 PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery) ) {
+                preparedStatement.setString(1, student.getName());
+                preparedStatement.setString(2, student.getSurname());
+                preparedStatement.setInt(3, student.getAge());
+                preparedStatement.setString(4, student.getEmail());
+                preparedStatement.setString(5, student.getPhone());
+                preparedStatement.setInt(6, id);
+
+                preparedStatement.executeUpdate();
+                students.clear();
+                students.addAll(getStudents());
+                return "Студент обновлён";
+            }
+        } catch (Exception e) {
+            return "Студент не обновлён";
         }
     }
 }

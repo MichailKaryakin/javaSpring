@@ -2,11 +2,11 @@ package model;
 
 public class Student {
     private int id;
-    private String name;
     private String surname;
-    private int age;
-    private String phone;
     private String email;
+    private String phone;
+    private String name;
+    private int age;
 
     public Student(int id, String name, String surname, int age, String email) {
         this.id = id;
