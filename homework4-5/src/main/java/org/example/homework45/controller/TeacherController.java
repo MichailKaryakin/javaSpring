@@ -120,11 +120,11 @@ public class TeacherController {
 
     @PostMapping("/add")
     public ResponseEntity<?> addTeacher(@RequestBody TeacherDTO teacherDTO) {
-        if (teacherDTO.getFirstName().isEmpty()) {  // валидация
+        if (teacherDTO.firstName().isEmpty()) {  // валидация
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         for (Teacher teacher : teacherList) {
-            if (teacher.getFirstName().equalsIgnoreCase(teacherDTO.getFirstName())) {
+            if (teacher.getFirstName().equalsIgnoreCase(teacherDTO.firstName())) {
                 return new ResponseEntity<>(HttpStatus.CONFLICT);
             }
         }
@@ -137,12 +137,12 @@ public class TeacherController {
     public ResponseEntity<?> addTeacher(@RequestBody List<TeacherDTO> teacherDTOList) {
         BulkAddResponse response = new BulkAddResponse();
         for (TeacherDTO teacherDTO : teacherDTOList) {
-            if (teacherDTO.getFirstName().isEmpty()) { // валидация
+            if (teacherDTO.firstName().isEmpty()) { // валидация
                 response.failed += 1;
                 response.errors.add("Bad Request");
             }
             for (Teacher teacher : teacherList) {
-                if (teacher.getFirstName().equalsIgnoreCase(teacherDTO.getFirstName())) {
+                if (teacher.getFirstName().equalsIgnoreCase(teacherDTO.firstName())) {
                     response.failed += 1;
                     response.errors.add("Conflict");
                 }
@@ -163,23 +163,23 @@ public class TeacherController {
 
     @PutMapping("/update/{id}")
     public ResponseEntity<?> fullTeacherUpdate(@RequestBody TeacherDTO teacherDTO, @PathVariable Integer id) {
-        if (teacherDTO.getFirstName().isEmpty()) { // валидация
+        if (teacherDTO.firstName().isEmpty()) { // валидация
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         for (Teacher teacher : teacherList) {
-            if (Objects.equals(teacher.getFirstName(), teacherDTO.getFirstName())) {
+            if (Objects.equals(teacher.getFirstName(), teacherDTO.firstName())) {
                 return new ResponseEntity<>(HttpStatus.CONFLICT);
             }
         }
         for (Teacher teacher : teacherList) {
             if (Objects.equals(teacher.getId(), id)) {
-                teacher.setFirstName(teacherDTO.getFirstName());
-                teacher.setLastName(teacherDTO.getLastName());
-                teacher.setEmail(teacherDTO.getEmail());
-                teacher.setExperience(teacherDTO.getExperience());
-                teacher.setSalary(teacherDTO.getSalary());
+                teacher.setFirstName(teacherDTO.firstName());
+                teacher.setLastName(teacherDTO.lastName());
+                teacher.setEmail(teacherDTO.email());
+                teacher.setExperience(teacherDTO.experience());
+                teacher.setSalary(teacherDTO.salary());
                 teacher.setActive(teacherDTO.isActive());
-                teacher.setSubject(teacherDTO.getSubject());
+                teacher.setSubject(teacherDTO.subject());
                 return new ResponseEntity<>(teacher, HttpStatus.OK);
             }
         }
@@ -188,37 +188,37 @@ public class TeacherController {
 
     @PatchMapping("/update-partial/{id}")
     public ResponseEntity<?> partialTeacherUpdate(@RequestBody TeacherDTO teacherDTO, @PathVariable Integer id) {
-        if (teacherDTO.getFirstName().isEmpty()) { // валидация
+        if (teacherDTO.firstName().isEmpty()) { // валидация
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } else {
             for (Teacher teacher : teacherList) {
-                if (Objects.equals(teacher.getFirstName(), teacherDTO.getFirstName())) {
+                if (Objects.equals(teacher.getFirstName(), teacherDTO.firstName())) {
                     return new ResponseEntity<>(HttpStatus.CONFLICT);
                 }
             }
         }
         for (Teacher teacher : teacherList) {
             if (Objects.equals(teacher.getId(), id)) {
-                if (teacherDTO.getFirstName() != null) {
-                    teacher.setFirstName(teacherDTO.getFirstName());
+                if (teacherDTO.firstName() != null) {
+                    teacher.setFirstName(teacherDTO.firstName());
                 }
-                if (teacherDTO.getLastName() != null) {
-                    teacher.setLastName(teacherDTO.getLastName());
+                if (teacherDTO.lastName() != null) {
+                    teacher.setLastName(teacherDTO.lastName());
                 }
-                if (teacherDTO.getEmail() != null) {
-                    teacher.setEmail(teacherDTO.getEmail());
+                if (teacherDTO.email() != null) {
+                    teacher.setEmail(teacherDTO.email());
                 }
-                if (teacherDTO.getExperience() != null) {
-                    teacher.setExperience(teacherDTO.getExperience());
+                if (teacherDTO.experience() != null) {
+                    teacher.setExperience(teacherDTO.experience());
                 }
-                if (teacherDTO.getSalary() != null) {
-                    teacher.setSalary(teacherDTO.getSalary());
+                if (teacherDTO.salary() != null) {
+                    teacher.setSalary(teacherDTO.salary());
                 }
                 if (teacherDTO.isActive()) {
                     teacher.setActive(teacherDTO.isActive());
                 }
-                if (teacherDTO.getSubject() != null) {
-                    teacher.setSubject(teacherDTO.getSubject());
+                if (teacherDTO.subject() != null) {
+                    teacher.setSubject(teacherDTO.subject());
                 }
                 return new ResponseEntity<>(teacher, HttpStatus.OK);
             }

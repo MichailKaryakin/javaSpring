@@ -13,12 +13,12 @@ public class Teacher {
 
     public Teacher(TeacherDTO teacherDTO) {
         this.id = idCount++;
-        this.firstName = teacherDTO.getFirstName();
-        this.lastName = teacherDTO.getLastName();
-        this.subject = teacherDTO.getSubject();
-        this.experience = teacherDTO.getExperience();
-        this.salary = teacherDTO.getSalary();
-        this.email = teacherDTO.getEmail();
+        this.firstName = teacherDTO.firstName();
+        this.lastName = teacherDTO.lastName();
+        this.subject = teacherDTO.subject();
+        this.experience = teacherDTO.experience();
+        this.salary = teacherDTO.salary();
+        this.email = teacherDTO.email();
         this.isActive = teacherDTO.isActive();
     }
 
