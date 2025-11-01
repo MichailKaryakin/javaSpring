@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public class BulkAddResponse {
-    private Integer added;
-    private Integer failed;
-    private List<ResponseEntity<?>> errors;
+    public Integer added;
+    public Integer failed;
+    public List<ResponseEntity<?>> errors;
 }
