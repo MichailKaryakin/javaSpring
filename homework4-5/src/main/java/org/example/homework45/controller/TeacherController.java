@@ -70,52 +70,107 @@ public class TeacherController {
     }
 
     @GetMapping("/filter")
-    public List<Teacher> filterByExperienceAndSalary(@RequestParam(name = "minExp", required = false) Integer minExperience,
-                                                     @RequestParam(name = "maxExp", required = false) Integer maxExperience,
-                                                     @RequestParam(name = "minSal", required = false) Double minSalary,
-                                                     @RequestParam(name = "maxSal", required = false) Double maxSalary) {
-        return teacherList.stream()
+    public ResponseEntity<?> filterByExperienceAndSalary(@RequestParam(name = "minExp", required = false) Integer minExperience,
+                                                         @RequestParam(name = "maxExp", required = false) Integer maxExperience,
+                                                         @RequestParam(name = "minSal", required = false) Double minSalary,
+                                                         @RequestParam(name = "maxSal", required = false) Double maxSalary) {
+        List<Teacher> results = teacherList.stream()
                 .filter(teacher -> teacher.getExperience() >= minExperience
                         && teacher.getExperience() <= maxExperience
                         && teacher.getSalary() >= minSalary
                         && teacher.getSalary() <= maxSalary)
                 .toList();
+        if (minSalary > maxSalary || minExperience > maxExperience) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } else if (results.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(results, HttpStatus.OK);
+        }
     }
 
     @GetMapping("/active")
-    public List<Teacher> getActive() {
-        return teacherList.stream()
+    public ResponseEntity<?> getActive() {
+        List<Teacher> results = teacherList.stream()
                 .filter(Teacher::isActive)
                 .toList();
+        if (results.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(results, HttpStatus.OK);
+        }
     }
 
     @GetMapping("/count")
-    public Integer getCount() {
-        return teacherList.size();
+    public ResponseEntity<?> getCount() {
+        Integer result = teacherList.size();
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @GetMapping("/count-by-subject")
-    public Map<String, Integer> getCountBySubject() {
+    public ResponseEntity<?> getCountBySubject() {
         Map<String, Integer> subjectsMap = new HashMap<>();
         teacherList.forEach(teacher -> subjectsMap.merge(teacher.getSubject(), 1, Integer::sum));
-        return subjectsMap;
+        if (subjectsMap.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(subjectsMap, HttpStatus.OK);
+        }
     }
 
     @PostMapping("/add")
-    public Teacher addTeacher(@RequestBody TeacherDTO teacherDTO) {
-        Teacher newTeacher = new Teacher(teacherDTO);
-        teacherList.add(newTeacher);
-        return newTeacher;
+    public ResponseEntity<?> addTeacher(@RequestBody TeacherDTO teacherDTO) {
+        if (teacherDTO.getFirstName().isEmpty()) {  // валидация
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        for (Teacher teacher : teacherList) {
+            if (teacher.getFirstName().equalsIgnoreCase(teacherDTO.getFirstName())) {
+                return new ResponseEntity<>(HttpStatus.CONFLICT);
+            }
+        }
+        Teacher teacher = new Teacher(teacherDTO);
+        teacherList.add(teacher);
+        return new ResponseEntity<>(teacher, HttpStatus.CREATED);
     }
 
     @PostMapping("/add-bulk")
-    public BulkAddResponse addTeacher(@RequestBody List<TeacherDTO> teacherDTOList) {
-        List<ResponseEntity<?>> errors = new ArrayList<>();
-        return new BulkAddResponse();
+    public ResponseEntity<?> addTeacher(@RequestBody List<TeacherDTO> teacherDTOList) {
+        BulkAddResponse response = new BulkAddResponse();
+        for (TeacherDTO teacherDTO : teacherDTOList) {
+            if (teacherDTO.getFirstName().isEmpty()) { // валидация
+                response.failed += 1;
+                response.errors.add("Bad Request");
+            }
+            for (Teacher teacher : teacherList) {
+                if (teacher.getFirstName().equalsIgnoreCase(teacherDTO.getFirstName())) {
+                    response.failed += 1;
+                    response.errors.add("Conflict");
+                }
+            }
+            Teacher teacher = new Teacher(teacherDTO);
+            teacherList.add(teacher);
+            response.added += 1;
+        }
+
+        if (response.failed == 0) {
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else if (response.added > 0) {
+            return new ResponseEntity<>(response.errors, HttpStatus.MULTI_STATUS);
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Teacher> fullTeacherUpdate(@RequestBody TeacherDTO teacherDTO, @PathVariable Integer id) {
+    public ResponseEntity<?> fullTeacherUpdate(@RequestBody TeacherDTO teacherDTO, @PathVariable Integer id) {
+        if (teacherDTO.getFirstName().isEmpty()) { // валидация
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        for (Teacher teacher : teacherList) {
+            if (Objects.equals(teacher.getFirstName(), teacherDTO.getFirstName())) {
+                return new ResponseEntity<>(HttpStatus.CONFLICT);
+            }
+        }
         for (Teacher teacher : teacherList) {
             if (Objects.equals(teacher.getId(), id)) {
                 teacher.setFirstName(teacherDTO.getFirstName());
@@ -125,63 +180,121 @@ public class TeacherController {
                 teacher.setSalary(teacherDTO.getSalary());
                 teacher.setActive(teacherDTO.isActive());
                 teacher.setSubject(teacherDTO.getSubject());
-                return ResponseEntity.ok(teacher);
+                return new ResponseEntity<>(teacher, HttpStatus.OK);
             }
         }
-        return ResponseEntity.notFound().build();
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @PatchMapping("/update-partial/{id}")
-    public ResponseEntity<Teacher> partialTeacherUpdate(@RequestBody TeacherDTO teacherDTO, @PathVariable Integer id) {
-        for (Teacher teacher : teacherList) {
-            if (Objects.equals(teacher.getId(), id)) {
-
-                return ResponseEntity.ok(teacher);
+    public ResponseEntity<?> partialTeacherUpdate(@RequestBody TeacherDTO teacherDTO, @PathVariable Integer id) {
+        if (teacherDTO.getFirstName().isEmpty()) { // валидация
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } else {
+            for (Teacher teacher : teacherList) {
+                if (Objects.equals(teacher.getFirstName(), teacherDTO.getFirstName())) {
+                    return new ResponseEntity<>(HttpStatus.CONFLICT);
+                }
             }
         }
-        return ResponseEntity.notFound().build();
+        for (Teacher teacher : teacherList) {
+            if (Objects.equals(teacher.getId(), id)) {
+                if (teacherDTO.getFirstName() != null) {
+                    teacher.setFirstName(teacherDTO.getFirstName());
+                }
+                if (teacherDTO.getLastName() != null) {
+                    teacher.setLastName(teacherDTO.getLastName());
+                }
+                if (teacherDTO.getEmail() != null) {
+                    teacher.setEmail(teacherDTO.getEmail());
+                }
+                if (teacherDTO.getExperience() != null) {
+                    teacher.setExperience(teacherDTO.getExperience());
+                }
+                if (teacherDTO.getSalary() != null) {
+                    teacher.setSalary(teacherDTO.getSalary());
+                }
+                if (teacherDTO.isActive()) {
+                    teacher.setActive(teacherDTO.isActive());
+                }
+                if (teacherDTO.getSubject() != null) {
+                    teacher.setSubject(teacherDTO.getSubject());
+                }
+                return new ResponseEntity<>(teacher, HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @PatchMapping("/deactivate/{id}")
-    public ResponseEntity<Teacher> deactivate(@PathVariable Integer id) {
+    public ResponseEntity<?> deactivate(@PathVariable Integer id) {
         for (Teacher teacher : teacherList) {
             if (Objects.equals(teacher.getId(), id)) {
-
-                return ResponseEntity.ok(teacher);
+                if (teacher.isActive()) {
+                    teacher.setActive(false);
+                    return new ResponseEntity<>(teacher, HttpStatus.OK);
+                } else {
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
             }
         }
-        return ResponseEntity.notFound().build();
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @PatchMapping("/activate/{id}")
-    public ResponseEntity<Teacher> activate(@PathVariable Integer id) {
+    public ResponseEntity<?> activate(@PathVariable Integer id) {
         for (Teacher teacher : teacherList) {
             if (Objects.equals(teacher.getId(), id)) {
-
-                return ResponseEntity.ok(teacher);
+                if (!teacher.isActive()) {
+                    teacher.setActive(true);
+                    return new ResponseEntity<>(teacher, HttpStatus.OK);
+                } else {
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
             }
         }
-        return ResponseEntity.notFound().build();
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @PatchMapping("/increase-salary/{id}")
-    public ResponseEntity<Teacher> increaseSalary(@RequestParam Integer percent, @PathVariable Integer id) {
-        for (Teacher teacher : teacherList) {
-            if (Objects.equals(teacher.getId(), id)) {
-
-                return ResponseEntity.ok(teacher);
+    public ResponseEntity<?> increaseSalary(@RequestParam Integer percent, @PathVariable Integer id) {
+        if (percent < 0 || percent > 100) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } else {
+            for (Teacher teacher : teacherList) {
+                if (Objects.equals(teacher.getId(), id)) {
+                    double newSalary = teacher.getSalary() + (teacher.getSalary() * percent / 100);
+                    if (newSalary > 10000) {
+                        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                    } else {
+                        teacher.setSalary(newSalary);
+                    }
+                    return new ResponseEntity<>(teacher, HttpStatus.OK);
+                }
             }
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable Integer id) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> deleteById(@PathVariable Integer id) {
+        if (id < 0) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        for (Teacher teacher : teacherList) {
+            if (Objects.equals(teacher.getId(), id)) {
+                teacherList.remove(teacher);
+                return new ResponseEntity<>(teacher, HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping("/delete-by-subject/{subject}")
-    public ResponseEntity<DeleteResponse> deleteBySubject(@PathVariable String subject) {
+    public ResponseEntity<?> deleteBySubject(@PathVariable String subject) {
+        if (subject.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         DeleteResponse deleteResponse = new DeleteResponse();
         for (Teacher teacher : teacherList) {
             if (Objects.equals(teacher.getSubject(), subject)) {
@@ -189,11 +302,15 @@ public class TeacherController {
                 deleteResponse.deleted += 1;
             }
         }
-        return ResponseEntity.ok(deleteResponse);
+        if (deleteResponse.deleted == 0) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(deleteResponse, HttpStatus.OK);
+        }
     }
 
     @DeleteMapping("/delete-inactive/")
-    public ResponseEntity<DeleteResponse> deleteInactive() {
+    public ResponseEntity<?> deleteInactive() {
         DeleteResponse deleteResponse = new DeleteResponse();
         for (Teacher teacher : teacherList) {
             if (!teacher.isActive()) {
@@ -201,6 +318,10 @@ public class TeacherController {
                 deleteResponse.deleted += 1;
             }
         }
-        return ResponseEntity.ok(deleteResponse);
+        if (deleteResponse.deleted == 0) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(deleteResponse, HttpStatus.OK);
+        }
     }
 }
