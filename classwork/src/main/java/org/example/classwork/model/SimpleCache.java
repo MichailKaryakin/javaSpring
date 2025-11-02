@@ -28,20 +28,24 @@ public class SimpleCache {
 
     public void put(String key, CountryListResponse response) {
         cache.put(key, new CacheData(response));
+        System.out.println("Добавлено в кэш: " + key);
     }
 
     public CountryListResponse get(String key) {
         CacheData cacheData = cache.get(key);
 
         if (cacheData == null) {
+            System.out.println("Нет записи в кэше: " + key);
             return null;
         }
 
         if (cacheData.isExpired()) {
             cache.remove(key);
+            System.out.println("Кэш просрочен и удалён: " + key);
             return null;
         }
 
+        System.out.println("Найдено в кэше: " + key);
         return cacheData.data;
     }
 
