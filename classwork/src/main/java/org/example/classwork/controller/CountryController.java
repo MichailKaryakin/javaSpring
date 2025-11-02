@@ -133,12 +133,12 @@ public class CountryController {
 
     @GetMapping("/cache/stats")
     public ResponseEntity<?> getCacheStats() {
-        return ResponseEntity.ok(cache);
+        return ResponseEntity.ok(cache.getStats());
     }
-
 
     @PostMapping("/cache/clear")
     public ResponseEntity<?> clearCache() {
-        return ResponseEntity.ok(cache);
+        cache.clear();
+        return ResponseEntity.ok("Кэш очищен");
     }
 }
