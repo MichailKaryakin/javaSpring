@@ -215,7 +215,7 @@ public class TeacherController {
                     teacher.setSalary(teacherDTO.salary());
                 }
                 if (teacherDTO.isActive()) {
-                    teacher.setActive(teacherDTO.isActive());
+                    teacher.setActive(true);
                 }
                 if (teacherDTO.subject() != null) {
                     teacher.setSubject(teacherDTO.subject());
