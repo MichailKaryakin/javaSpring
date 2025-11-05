@@ -52,11 +52,12 @@ public class TeacherController {
                     .toList();
         } else if (name.isEmpty() && !surname.isEmpty()) {
             results = teacherList.stream()
-                    .filter(teacher -> teacher.getLastName().equalsIgnoreCase(name))
+                    .filter(teacher -> teacher.getLastName().equalsIgnoreCase(surname))
                     .toList();
         } else if (!name.isEmpty()) {
             results = teacherList.stream()
-                    .filter(teacher -> (teacher.getLastName() + teacher.getFirstName()).equalsIgnoreCase(name))
+                    .filter(teacher -> (teacher.getLastName() + teacher.getFirstName())
+                            .equalsIgnoreCase(name + surname))
                     .toList();
         } else {
             return new ResponseEntity<>(teacherList, HttpStatus.OK);
@@ -88,11 +89,13 @@ public class TeacherController {
                                                          @RequestParam(name = "maxExp", required = false) Integer maxExperience,
                                                          @RequestParam(name = "minSal", required = false) Double minSalary,
                                                          @RequestParam(name = "maxSal", required = false) Double maxSalary) {
-        if (minSalary > maxSalary || minExperience > maxExperience
+        if (minSalary == null || maxSalary == null || minExperience == null || maxExperience == null
+                || minSalary > maxSalary || minExperience > maxExperience
                 || Validator.salaryIsNotValid(minSalary) || Validator.salaryIsNotValid(maxSalary)
                 || Validator.experienceIsNotValid(minExperience) || Validator.experienceIsNotValid(maxExperience)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+
         List<Teacher> results = teacherList.stream()
                 .filter(teacher -> teacher.getExperience() >= minExperience
                         && teacher.getExperience() <= maxExperience
@@ -152,23 +155,24 @@ public class TeacherController {
     }
 
     @PostMapping("/add-bulk")
-    public ResponseEntity<?> addTeacher(@RequestBody List<TeacherDTO> teacherDTOList) {
+    public ResponseEntity<?> addTeachers(@RequestBody List<TeacherDTO> teacherDTOList) {
         BulkAddResponse response = new BulkAddResponse();
         for (TeacherDTO teacherDTO : teacherDTOList) {
             if (Validator.teacherIsNotValid(teacherDTO)) {
-                response.failed += 1;
+                response.failed++;
                 response.errors.add("Bad Request");
+                continue;
             }
-            for (Teacher teacher : teacherList) {
-                if ((teacher.getFirstName() + teacher.getLastName())
-                        .equalsIgnoreCase((teacherDTO.firstName() + teacherDTO.lastName()))) {
-                    response.failed += 1;
-                    response.errors.add("Conflict");
-                }
+            boolean exists = teacherList.stream()
+                    .anyMatch(teacher -> (teacher.getFirstName() + teacher.getLastName())
+                            .equalsIgnoreCase(teacherDTO.firstName() + teacherDTO.lastName()));
+            if (exists) {
+                response.failed++;
+                response.errors.add("Conflict");
+                continue;
             }
-            Teacher teacher = new Teacher(teacherDTO);
-            teacherList.add(teacher);
-            response.added += 1;
+            teacherList.add(new Teacher(teacherDTO));
+            response.added++;
         }
 
         if (response.failed == 0) {
@@ -282,7 +286,7 @@ public class TeacherController {
         } else {
             for (Teacher teacher : teacherList) {
                 if (Objects.equals(teacher.getId(), id)) {
-                    double newSalary = teacher.getSalary() + (teacher.getSalary() * percent / 100);
+                    double newSalary = teacher.getSalary() + teacher.getSalary() * percent / 100.0;
                     if (newSalary > 10000) {
                         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                     } else {
