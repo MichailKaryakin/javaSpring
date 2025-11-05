@@ -1,9 +1,6 @@
 package org.example.homework45.controller;
 
-import org.example.homework45.model.BulkAddResponse;
-import org.example.homework45.model.DeleteResponse;
-import org.example.homework45.model.Teacher;
-import org.example.homework45.model.TeacherDTO;
+import org.example.homework45.model.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,13 +39,30 @@ public class TeacherController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<?> searchByName(@RequestParam(name = "name") String name) {
-        List<Teacher> results = teacherList.stream()
-                .filter(teacher -> teacher.getFirstName().equalsIgnoreCase(name))
-                .toList();
-        if (name.isEmpty()) {
+    public ResponseEntity<?> searchByName(@RequestParam(name = "name", required = false) String name,
+                                          @RequestParam(name = "surname", required = false) String surname) {
+        if (Validator.nameIsNotValid(name) || Validator.nameIsNotValid(surname)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } else if (results.isEmpty()) {
+        }
+
+        List<Teacher> results;
+        if (surname.isEmpty() && !name.isEmpty()) {
+            results = teacherList.stream()
+                    .filter(teacher -> teacher.getFirstName().equalsIgnoreCase(name))
+                    .toList();
+        } else if (name.isEmpty() && !surname.isEmpty()) {
+            results = teacherList.stream()
+                    .filter(teacher -> teacher.getLastName().equalsIgnoreCase(name))
+                    .toList();
+        } else if (!name.isEmpty()) {
+            results = teacherList.stream()
+                    .filter(teacher -> (teacher.getLastName() + teacher.getFirstName()).equalsIgnoreCase(name))
+                    .toList();
+        } else {
+            return new ResponseEntity<>(teacherList, HttpStatus.OK);
+        }
+
+        if (results.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
             return new ResponseEntity<>(results, HttpStatus.OK);
@@ -74,15 +88,18 @@ public class TeacherController {
                                                          @RequestParam(name = "maxExp", required = false) Integer maxExperience,
                                                          @RequestParam(name = "minSal", required = false) Double minSalary,
                                                          @RequestParam(name = "maxSal", required = false) Double maxSalary) {
+        if (minSalary > maxSalary || minExperience > maxExperience
+                || Validator.salaryIsNotValid(minSalary) || Validator.salaryIsNotValid(maxSalary)
+                || Validator.experienceIsNotValid(minExperience) || Validator.experienceIsNotValid(maxExperience)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         List<Teacher> results = teacherList.stream()
                 .filter(teacher -> teacher.getExperience() >= minExperience
                         && teacher.getExperience() <= maxExperience
                         && teacher.getSalary() >= minSalary
                         && teacher.getSalary() <= maxSalary)
                 .toList();
-        if (minSalary > maxSalary || minExperience > maxExperience) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } else if (results.isEmpty()) {
+        if (results.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
             return new ResponseEntity<>(results, HttpStatus.OK);
@@ -120,11 +137,12 @@ public class TeacherController {
 
     @PostMapping("/add")
     public ResponseEntity<?> addTeacher(@RequestBody TeacherDTO teacherDTO) {
-        if (teacherDTO.firstName().isEmpty()) {  // валидация
+        if (Validator.teacherIsNotValid(teacherDTO)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         for (Teacher teacher : teacherList) {
-            if (teacher.getFirstName().equalsIgnoreCase(teacherDTO.firstName())) {
+            if ((teacher.getFirstName() + teacher.getLastName())
+                    .equalsIgnoreCase((teacherDTO.firstName() + teacherDTO.lastName()))) {
                 return new ResponseEntity<>(HttpStatus.CONFLICT);
             }
         }
@@ -137,12 +155,13 @@ public class TeacherController {
     public ResponseEntity<?> addTeacher(@RequestBody List<TeacherDTO> teacherDTOList) {
         BulkAddResponse response = new BulkAddResponse();
         for (TeacherDTO teacherDTO : teacherDTOList) {
-            if (teacherDTO.firstName().isEmpty()) { // валидация
+            if (Validator.teacherIsNotValid(teacherDTO)) {
                 response.failed += 1;
                 response.errors.add("Bad Request");
             }
             for (Teacher teacher : teacherList) {
-                if (teacher.getFirstName().equalsIgnoreCase(teacherDTO.firstName())) {
+                if ((teacher.getFirstName() + teacher.getLastName())
+                        .equalsIgnoreCase((teacherDTO.firstName() + teacherDTO.lastName()))) {
                     response.failed += 1;
                     response.errors.add("Conflict");
                 }
@@ -163,7 +182,7 @@ public class TeacherController {
 
     @PutMapping("/update/{id}")
     public ResponseEntity<?> fullTeacherUpdate(@RequestBody TeacherDTO teacherDTO, @PathVariable Integer id) {
-        if (teacherDTO.firstName().isEmpty()) { // валидация
+        if (Validator.teacherIsNotValid(teacherDTO)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         for (Teacher teacher : teacherList) {
@@ -188,7 +207,7 @@ public class TeacherController {
 
     @PatchMapping("/update-partial/{id}")
     public ResponseEntity<?> partialTeacherUpdate(@RequestBody TeacherDTO teacherDTO, @PathVariable Integer id) {
-        if (teacherDTO.firstName().isEmpty()) { // валидация
+        if (Validator.teacherIsNotValid(teacherDTO)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         } else {
             for (Teacher teacher : teacherList) {
