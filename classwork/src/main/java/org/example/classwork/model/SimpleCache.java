@@ -13,12 +13,12 @@ public class SimpleCache {
     }
 
     class CacheData {
-        CountryListResponse data;
+        Object data;
         long time;
 
-        public CacheData(CountryListResponse data) {
+        public CacheData(Object data) {
             this.data = data;
-            time = System.currentTimeMillis();
+            this.time = System.currentTimeMillis();
         }
 
         boolean isExpired() {
@@ -26,12 +26,13 @@ public class SimpleCache {
         }
     }
 
-    public void put(String key, CountryListResponse response) {
+    public void put(String key, Object response) {
         cache.put(key, new CacheData(response));
         System.out.println("Добавлено в кэш: " + key);
     }
 
-    public CountryListResponse get(String key) {
+    @SuppressWarnings("unchecked")
+    public <T> T get(String key) {
         CacheData cacheData = cache.get(key);
 
         if (cacheData == null) {
@@ -46,7 +47,7 @@ public class SimpleCache {
         }
 
         System.out.println("Найдено в кэше: " + key);
-        return cacheData.data;
+        return (T) cacheData.data;
     }
 
     public Map<String, Object> getStats() {
@@ -63,10 +64,16 @@ public class SimpleCache {
             info.put("expired", expired);
             info.put("ageMs", age);
             info.put("expiresInMs", Math.max(expiresIn, 0));
-            info.put("countriesCount",
-                    data.data != null && data.data.getCountries() != null
-                            ? data.data.getCountries().size()
-                            : 0);
+            info.put("type", data.data != null ? data.data.getClass().getSimpleName() : "null");
+
+            try {
+                assert data.data != null;
+                var method = data.data.getClass().getMethod("getCountries");
+                Object countries = method.invoke(data.data);
+                if (countries instanceof java.util.List<?> list) {
+                    info.put("countriesCount", list.size());
+                }
+            } catch (Exception ignored) {}
 
             entries.put(entry.getKey(), info);
         }

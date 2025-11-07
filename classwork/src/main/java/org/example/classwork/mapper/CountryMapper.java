@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class CountryMapper {
-    public static List<CountryResponse> mapToCountryResponseList(CountryApiResponse[] apiResponses) {
+    public static List<CountryResponse> toCountryListResponse(CountryApiResponse[] apiResponses) {
         List<CountryResponse> list = new ArrayList<>();
         if (apiResponses == null) return list;
 
@@ -18,7 +18,7 @@ public class CountryMapper {
                 response.setName(api.getName().getCommon());
             }
             if (api.getCapital() != null && !api.getCapital().isEmpty()) {
-                response.setCapital(api.getCapital().get(0));
+                response.setCapital(api.getCapital().getFirst());
             }
             response.setPopulation(api.getPopulation());
             response.setArea(api.getArea());

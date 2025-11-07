@@ -11,7 +11,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/countries")
 public class CountryController {
-
     private final SimpleCache cache = new SimpleCache(1800000); // 30 минут TTL
 
     @GetMapping("/search/{name}")
@@ -33,7 +32,7 @@ public class CountryController {
 
         if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
             List<CountryResponse> countries =
-                    CountryMapper.mapToCountryResponseList(response.getBody());
+                    CountryMapper.toCountryListResponse(response.getBody());
 
             CountryListResponse listResponse = new CountryListResponse();
             listResponse.setCountries(countries);
@@ -68,7 +67,7 @@ public class CountryController {
 
         if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
             List<CountryResponse> countries =
-                    CountryMapper.mapToCountryResponseList(response.getBody());
+                    CountryMapper.toCountryListResponse(response.getBody());
 
             CountryListResponse listResponse = new CountryListResponse();
             listResponse.setCountries(countries);
@@ -107,7 +106,7 @@ public class CountryController {
                 return ResponseEntity.status(response.getStatusCode()).body("Ошибка при получении данных из API");
             }
 
-            countries = CountryMapper.mapToCountryResponseList(response.getBody());
+            countries = CountryMapper.toCountryListResponse(response.getBody());
 
             CountryListResponse listResponse = new CountryListResponse();
             listResponse.setCountries(countries);
