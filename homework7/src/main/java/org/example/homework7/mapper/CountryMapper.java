@@ -1,7 +1,7 @@
-package org.example.classwork.mapper;
+package org.example.homework7.mapper;
 
-import org.example.classwork.model.CountryApiResponse;
-import org.example.classwork.model.CountryResponse;
+import org.example.homework7.model.CountryApiResponse;
+import org.example.homework7.model.CountryResponse;
 
 import java.util.ArrayList;
 import java.util.List;

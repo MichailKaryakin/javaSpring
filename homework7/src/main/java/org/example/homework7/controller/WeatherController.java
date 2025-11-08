@@ -1,9 +1,10 @@
-package org.example.classwork.controller;
+package org.example.homework7.controller;
 
-import org.example.classwork.mapper.WeatherMapper;
-import org.example.classwork.model.SimpleCache;
-import org.example.classwork.model.WeatherApiResponse;
-import org.example.classwork.model.WeatherResponse;
+import org.example.homework7.mapper.WeatherMapper;
+import org.example.homework7.model.SimpleCache;
+import org.example.homework7.model.WeatherApiResponse;
+import org.example.homework7.model.WeatherResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -12,6 +13,8 @@ import org.springframework.web.client.RestTemplate;
 @RequestMapping("/api/weather")
 public class WeatherController {
     private final SimpleCache cache = new SimpleCache(300000);
+    @Value("${weather.api.key:}")
+    private String apiKey;
 
     @GetMapping("")
     public ResponseEntity<?> getWeatherData(@RequestParam String city) {
@@ -24,7 +27,6 @@ public class WeatherController {
         }
 
         RestTemplate restTemplate = new RestTemplate();
-        String apiKey = "5d05875a86d640886fd7411d9c47a972";
         String requestUrl
                 = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=" + apiKey + "&units=metric";
         ResponseEntity<WeatherApiResponse> response = restTemplate.getForEntity(requestUrl, WeatherApiResponse.class);

@@ -1,4 +1,4 @@
-package org.example.classwork.model;
+package org.example.homework7.model;
 
 import java.util.List;
 import java.util.Map;

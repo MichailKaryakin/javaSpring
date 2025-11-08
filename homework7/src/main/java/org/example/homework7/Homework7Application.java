@@ -1,13 +1,13 @@
-package org.example.classwork;
+package org.example.homework7;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ClassworkApplication {
+public class Homework7Application {
 
     public static void main(String[] args) {
-        SpringApplication.run(ClassworkApplication.class, args);
+        SpringApplication.run(Homework7Application.class, args);
     }
 
 }

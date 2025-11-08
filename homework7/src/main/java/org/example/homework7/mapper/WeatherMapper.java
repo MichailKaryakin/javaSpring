@@ -1,7 +1,7 @@
-package org.example.classwork.mapper;
+package org.example.homework7.mapper;
 
-import org.example.classwork.model.WeatherApiResponse;
-import org.example.classwork.model.WeatherResponse;
+import org.example.homework7.model.WeatherApiResponse;
+import org.example.homework7.model.WeatherResponse;
 
 public class WeatherMapper {
     public static WeatherResponse toWeatherResponse(WeatherApiResponse apiResponse) {

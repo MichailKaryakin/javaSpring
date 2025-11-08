@@ -1,7 +1,7 @@
-package org.example.classwork.controller;
+package org.example.homework7.controller;
 
-import org.example.classwork.mapper.CountryMapper;
-import org.example.classwork.model.*;
+import org.example.homework7.mapper.CountryMapper;
+import org.example.homework7.model.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
