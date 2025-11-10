@@ -1,7 +1,12 @@
 package org.example.homework7.model;
 
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 
+@Service
+@Scope("prototype")
 public class CountryListResponse {
     private List<CountryResponse> countries;
     private int totalResults;

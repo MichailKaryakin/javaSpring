@@ -11,6 +11,7 @@ public class WeatherApiResponse {
     public String getName() {
         return name;
     }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -18,6 +19,7 @@ public class WeatherApiResponse {
     public Main getMain() {
         return main;
     }
+
     public void setMain(Main main) {
         this.main = main;
     }
@@ -25,6 +27,7 @@ public class WeatherApiResponse {
     public List<Weather> getWeather() {
         return weather;
     }
+
     public void setWeather(List<Weather> weather) {
         this.weather = weather;
     }
@@ -32,6 +35,7 @@ public class WeatherApiResponse {
     public Wind getWind() {
         return wind;
     }
+
     public void setWind(Wind wind) {
         this.wind = wind;
     }
@@ -44,6 +48,7 @@ public class WeatherApiResponse {
         public double getTemp() {
             return temp;
         }
+
         public void setTemp(double temp) {
             this.temp = temp;
         }
@@ -51,6 +56,7 @@ public class WeatherApiResponse {
         public int getHumidity() {
             return humidity;
         }
+
         public void setHumidity(int humidity) {
             this.humidity = humidity;
         }
@@ -58,6 +64,7 @@ public class WeatherApiResponse {
         public int getPressure() {
             return pressure;
         }
+
         public void setPressure(int pressure) {
             this.pressure = pressure;
         }
@@ -70,6 +77,7 @@ public class WeatherApiResponse {
         public String getDescription() {
             return description;
         }
+
         public void setDescription(String description) {
             this.description = description;
         }
@@ -77,6 +85,7 @@ public class WeatherApiResponse {
         public String getIcon() {
             return icon;
         }
+
         public void setIcon(String icon) {
             this.icon = icon;
         }
@@ -88,6 +97,7 @@ public class WeatherApiResponse {
         public double getSpeed() {
             return speed;
         }
+
         public void setSpeed(double speed) {
             this.speed = speed;
         }

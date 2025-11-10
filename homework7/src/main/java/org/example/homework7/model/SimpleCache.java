@@ -1,14 +1,19 @@
 package org.example.homework7.model;
 
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Component
+@Scope("prototype")
 public class SimpleCache {
     private final Map<String, CacheData> cache = new ConcurrentHashMap<>();
-    private final long timeToLive;
+    private long timeToLive;
 
-    public SimpleCache(long timeToLive) {
+    public void setTimeToLive(long timeToLive) {
         this.timeToLive = timeToLive;
     }
 

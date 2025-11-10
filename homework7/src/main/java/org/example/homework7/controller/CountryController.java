@@ -2,6 +2,8 @@ package org.example.homework7.controller;
 
 import org.example.homework7.mapper.CountryMapper;
 import org.example.homework7.model.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -11,7 +13,19 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/countries")
 public class CountryController {
-    private final SimpleCache cache = new SimpleCache(1800000); // 30 минут TTL
+    private final SimpleCache cache;
+    private final CountryListResponse listResponse;
+    @Value("${country.cache.ttl:}")
+    private long ttl;
+    private final RestTemplate restTemplate;
+
+    @Autowired
+    public CountryController(SimpleCache cache, RestTemplate restTemplate, CountryListResponse countryListResponse) {
+        this.cache = cache;
+        this.listResponse = countryListResponse;
+        this.restTemplate = restTemplate;
+        cache.setTimeToLive(ttl);
+    }
 
     @GetMapping("/search/{name}")
     public ResponseEntity<?> searchCountry(@PathVariable String name) {
@@ -25,7 +39,6 @@ public class CountryController {
 
         System.out.println("Запрашиваются данные из API для страны: " + name);
 
-        RestTemplate restTemplate = new RestTemplate();
         String url = "https://restcountries.com/v3.1/name/" + name;
         ResponseEntity<CountryApiResponse[]> response =
                 restTemplate.getForEntity(url, CountryApiResponse[].class);
@@ -34,7 +47,6 @@ public class CountryController {
             List<CountryResponse> countries =
                     CountryMapper.toCountryListResponse(response.getBody());
 
-            CountryListResponse listResponse = new CountryListResponse();
             listResponse.setCountries(countries);
             listResponse.setTotalResults(countries.size());
             listResponse.setFilterApplied("name=" + name);
@@ -60,7 +72,6 @@ public class CountryController {
 
         System.out.println("Запрашиваются данные из API для региона: " + region);
 
-        RestTemplate restTemplate = new RestTemplate();
         String url = "https://restcountries.com/v3.1/region/" + region;
         ResponseEntity<CountryApiResponse[]> response =
                 restTemplate.getForEntity(url, CountryApiResponse[].class);
@@ -69,7 +80,6 @@ public class CountryController {
             List<CountryResponse> countries =
                     CountryMapper.toCountryListResponse(response.getBody());
 
-            CountryListResponse listResponse = new CountryListResponse();
             listResponse.setCountries(countries);
             listResponse.setTotalResults(countries.size());
             listResponse.setFilterApplied("region=" + region);
@@ -96,7 +106,6 @@ public class CountryController {
         } else {
             System.out.println("Запрашиваются данные по всем странам из API");
 
-            RestTemplate restTemplate = new RestTemplate();
             String url = "https://restcountries.com/v3.1/all";
             ResponseEntity<CountryApiResponse[]> response =
                     restTemplate.getForEntity(url, CountryApiResponse[].class);
@@ -108,7 +117,6 @@ public class CountryController {
 
             countries = CountryMapper.toCountryListResponse(response.getBody());
 
-            CountryListResponse listResponse = new CountryListResponse();
             listResponse.setCountries(countries);
             listResponse.setTotalResults(countries.size());
             listResponse.setFilterApplied("all");
