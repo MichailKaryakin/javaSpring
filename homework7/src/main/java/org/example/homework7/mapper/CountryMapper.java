@@ -8,6 +8,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class CountryMapper {
+    private CountryMapper() {
+
+    }
+
     public static List<CountryResponse> toCountryListResponse(CountryApiResponse[] apiResponses) {
         List<CountryResponse> list = new ArrayList<>();
         if (apiResponses == null) return list;

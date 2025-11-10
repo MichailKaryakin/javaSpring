@@ -4,6 +4,10 @@ import org.example.homework7.model.WeatherApiResponse;
 import org.example.homework7.model.WeatherResponse;
 
 public class WeatherMapper {
+    private WeatherMapper() {
+
+    }
+
     public static WeatherResponse toWeatherResponse(WeatherApiResponse apiResponse) {
         if (apiResponse == null || apiResponse.getMain() == null) {
             return null;
