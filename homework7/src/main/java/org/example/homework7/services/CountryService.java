@@ -1,5 +1,6 @@
 package org.example.homework7.services;
 
+import jakarta.annotation.PostConstruct;
 import org.example.homework7.mapper.CountryMapper;
 import org.example.homework7.model.CountryApiResponse;
 import org.example.homework7.model.CountryListResponse;
@@ -7,6 +8,7 @@ import org.example.homework7.model.CountryResponse;
 import org.example.homework7.model.SimpleCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -16,26 +18,31 @@ import java.util.List;
 @Service
 public class CountryService {
     private final SimpleCache cache;
-    private final CountryListResponse listResponse;
+    private CountryListResponse cachedResponse;
     @Value("${country.cache.ttl:}")
     private long ttl;
     private final RestTemplate restTemplate;
+    private final ApplicationContext context;
 
     @Autowired
-    public CountryService(SimpleCache cache, RestTemplate restTemplate, CountryListResponse countryListResponse) {
+    public CountryService(SimpleCache cache, RestTemplate restTemplate, ApplicationContext context) {
         this.cache = cache;
-        this.listResponse = countryListResponse;
         this.restTemplate = restTemplate;
+        this.context = context;
+    }
+
+    @PostConstruct
+    public void setTtl() {
         cache.setTimeToLive(ttl);
     }
 
     public ResponseEntity<?> searchCountry(String name) {
         String key = "country_name_" + name.toUpperCase();
-        CountryListResponse cached = cache.get(key);
+        cachedResponse = cache.get(key);
 
-        if (cached != null) {
+        if (cachedResponse != null) {
             System.out.println("Данные по '" + name + "' взяты из кэша");
-            return ResponseEntity.ok(cached);
+            return ResponseEntity.ok(cachedResponse);
         }
 
         System.out.println("Запрашиваются данные из API для страны: " + name);
@@ -48,6 +55,7 @@ public class CountryService {
             List<CountryResponse> countries =
                     CountryMapper.toCountryListResponse(response.getBody());
 
+            CountryListResponse listResponse = context.getBean(CountryListResponse.class);
             listResponse.setCountries(countries);
             listResponse.setTotalResults(countries.size());
             listResponse.setFilterApplied("name=" + name);
@@ -63,11 +71,11 @@ public class CountryService {
 
     public ResponseEntity<?> getRegionCountries(String region) {
         String key = "country_region_" + region.toUpperCase();
-        CountryListResponse cached = cache.get(key);
+        cachedResponse = cache.get(key);
 
-        if (cached != null) {
+        if (cachedResponse != null) {
             System.out.println("Данные по региону '" + region + "' взяты из кэша");
-            return ResponseEntity.ok(cached);
+            return ResponseEntity.ok(cachedResponse);
         }
 
         System.out.println("Запрашиваются данные из API для региона: " + region);
@@ -80,6 +88,7 @@ public class CountryService {
             List<CountryResponse> countries =
                     CountryMapper.toCountryListResponse(response.getBody());
 
+            CountryListResponse listResponse = context.getBean(CountryListResponse.class);
             listResponse.setCountries(countries);
             listResponse.setTotalResults(countries.size());
             listResponse.setFilterApplied("region=" + region);
@@ -95,13 +104,13 @@ public class CountryService {
 
     public ResponseEntity<?> getByPopulation(int min, int max) {
         String key = "country_all";
-        CountryListResponse cached = cache.get(key);
+        cachedResponse = cache.get(key);
 
         List<CountryResponse> countries;
 
-        if (cached != null) {
+        if (cachedResponse != null) {
             System.out.println("Данные по всем странам взяты из кэша");
-            countries = cached.getCountries();
+            countries = cachedResponse.getCountries();
         } else {
             System.out.println("Запрашиваются данные по всем странам из API");
 
@@ -116,6 +125,7 @@ public class CountryService {
 
             countries = CountryMapper.toCountryListResponse(response.getBody());
 
+            CountryListResponse listResponse = context.getBean(CountryListResponse.class);
             listResponse.setCountries(countries);
             listResponse.setTotalResults(countries.size());
             listResponse.setFilterApplied("all");
@@ -128,13 +138,13 @@ public class CountryService {
                 .filter(c -> c.getPopulation() >= min && c.getPopulation() <= max)
                 .toList();
 
-        CountryListResponse filteredResponse = new CountryListResponse();
-        filteredResponse.setCountries(filtered);
-        filteredResponse.setTotalResults(filtered.size());
-        filteredResponse.setFilterApplied("population=" + min + "-" + max);
+        CountryListResponse listResponse = context.getBean(CountryListResponse.class);
+        listResponse.setCountries(filtered);
+        listResponse.setTotalResults(filtered.size());
+        listResponse.setFilterApplied("population=" + min + "-" + max);
 
         System.out.println("Отфильтровано стран по населению: " + filtered.size());
-        return ResponseEntity.ok(filteredResponse);
+        return ResponseEntity.ok(listResponse);
     }
 
     public ResponseEntity<?> getCacheStats() {

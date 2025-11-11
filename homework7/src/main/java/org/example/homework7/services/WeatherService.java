@@ -1,5 +1,6 @@
 package org.example.homework7.services;
 
+import jakarta.annotation.PostConstruct;
 import org.example.homework7.mapper.WeatherMapper;
 import org.example.homework7.model.SimpleCache;
 import org.example.homework7.model.WeatherApiResponse;
@@ -23,6 +24,10 @@ public class WeatherService {
     public WeatherService(SimpleCache cache, RestTemplate restTemplate) {
         this.cache = cache;
         this.restTemplate = restTemplate;
+    }
+
+    @PostConstruct
+    public void setTtl() {
         cache.setTimeToLive(ttl);
     }
 

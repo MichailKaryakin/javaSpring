@@ -71,15 +71,6 @@ public class SimpleCache {
             info.put("expiresInMs", Math.max(expiresIn, 0));
             info.put("type", data.data != null ? data.data.getClass().getSimpleName() : "null");
 
-            try {
-                assert data.data != null;
-                var method = data.data.getClass().getMethod("getCountries");
-                Object countries = method.invoke(data.data);
-                if (countries instanceof java.util.List<?> list) {
-                    info.put("countriesCount", list.size());
-                }
-            } catch (Exception ignored) {}
-
             entries.put(entry.getKey(), info);
         }
 
