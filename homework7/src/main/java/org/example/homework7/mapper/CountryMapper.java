@@ -1,7 +1,7 @@
 package org.example.homework7.mapper;
 
 import org.example.homework7.model.CountryApiResponse;
-import org.example.homework7.model.CountryResponse;
+import org.example.homework7.dto.CountryResponse;
 
 import java.util.ArrayList;
 import java.util.List;

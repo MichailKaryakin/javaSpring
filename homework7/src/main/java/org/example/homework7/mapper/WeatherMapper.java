@@ -1,7 +1,7 @@
 package org.example.homework7.mapper;
 
 import org.example.homework7.model.WeatherApiResponse;
-import org.example.homework7.model.WeatherResponse;
+import org.example.homework7.dto.WeatherResponse;
 
 public class WeatherMapper {
     private WeatherMapper() {

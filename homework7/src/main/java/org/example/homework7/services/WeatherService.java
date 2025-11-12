@@ -4,7 +4,7 @@ import jakarta.annotation.PostConstruct;
 import org.example.homework7.mapper.WeatherMapper;
 import org.example.homework7.model.SimpleCache;
 import org.example.homework7.model.WeatherApiResponse;
-import org.example.homework7.model.WeatherResponse;
+import org.example.homework7.dto.WeatherResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;

@@ -1,4 +1,4 @@
-package org.example.homework7.model;
+package org.example.homework7.dto;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;

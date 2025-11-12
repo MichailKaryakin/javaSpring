@@ -5,8 +5,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * Класс конфигурации бинов
+ */
 @Configuration
 public class Config {
+    /**
+     * Получение бина restTemplate
+     */
     @Bean(name = "restTemplate")
     public RestTemplate getRestTemplateShort() {
         System.out.println("getRestTemplate");

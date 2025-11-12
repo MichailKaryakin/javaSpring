@@ -1,4 +1,4 @@
-package org.example.homework7.model;
+package org.example.homework7.dto;
 
 import java.util.List;
 

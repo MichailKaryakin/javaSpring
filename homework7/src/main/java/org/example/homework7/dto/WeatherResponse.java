@@ -1,4 +1,4 @@
-package org.example.homework7.model;
+package org.example.homework7.dto;
 
 public class WeatherResponse {
     private String city;
