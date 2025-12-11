@@ -1,27 +1,56 @@
 package org.example.homework12.service.impl;
 
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.example.homework12.dto.BookRequest;
 import org.example.homework12.dto.BookResponse;
 import org.example.homework12.entity.Book;
+import org.example.homework12.exception.BookNotFoundException;
+import org.example.homework12.exception.InvalidBookDataException;
 import org.example.homework12.repository.BookRepository;
 import org.example.homework12.service.BookService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class BookServiceImpl implements BookService {
 
-    BookRepository bookRepository;
+    private final BookRepository bookRepository;
 
-    private boolean validateBook(BookRequest bookRequest) {
-        return true;
+    private void validateBook(BookRequest bookRequest) {
+
+        if (bookRequest == null) {
+            throw new InvalidBookDataException("Book request cannot be null");
+        }
+
+        if (bookRequest.title() == null || bookRequest.title().isBlank()) {
+            throw new InvalidBookDataException("Title cannot be empty");
+        }
+        if (bookRequest.title().trim().length() < 2) {
+            throw new InvalidBookDataException("Title must be at least 2 characters long");
+        }
+
+        if (bookRequest.author() == null || bookRequest.author().isBlank()) {
+            throw new InvalidBookDataException("Author cannot be empty");
+        }
+
+        if (bookRequest.year() == null) {
+            throw new InvalidBookDataException("Year cannot be null");
+        }
+
+        int currentYear = java.time.Year.now().getValue();
+        if (bookRequest.year() < -2600 || bookRequest.year() > currentYear) {
+            throw new InvalidBookDataException(
+                    "Year must be between 2600 BC and " + currentYear + " AD"
+            );
+        }
+
+        if (bookRequest.description() != null && bookRequest.description().trim().length() < 10) {
+            throw new InvalidBookDataException("Description must be at least 10 characters long");
+        }
     }
 
     private BookResponse toResponse(Book book) {
@@ -35,48 +64,54 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public ResponseEntity<@NonNull List<BookResponse>> getAllBooks() {
-        List<Book> books = bookRepository.findAll();
-        List<BookResponse> bookResponses = new ArrayList<>();
-        books.forEach(book -> bookResponses.add(toResponse(book)));
-        return ResponseEntity.ok(bookResponses);
+    public ResponseEntity<List<BookResponse>> getAllBooks() {
+        List<BookResponse> result = bookRepository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+
+        return ResponseEntity.ok(result);
     }
 
     @Override
-    public ResponseEntity<@NonNull BookResponse> getBookById(Long id) {
-        Optional<@NonNull Book> book = bookRepository.findById(id);
-        return book.map(value -> ResponseEntity.ok(toResponse(value))).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<BookResponse> getBookById(Long id) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new BookNotFoundException(id));
+
+        return ResponseEntity.ok(toResponse(book));
     }
 
     @Override
-    public ResponseEntity<@NonNull BookResponse> createBook(BookRequest request) {
-        if (validateBook(request)) {
-            Book book = Book.builder()
-                    .title(request.title())
-                    .author(request.author())
-                    .year(request.year())
-                    .description(request.description())
-                    .build();
+    public ResponseEntity<BookResponse> createBook(BookRequest request) {
 
-            return ResponseEntity.ok(toResponse(bookRepository.save(book)));
-        } else {
-            return ResponseEntity.badRequest().build();
-        }
+        validateBook(request);
+
+        Book book = Book.builder()
+                .title(request.title())
+                .author(request.author())
+                .year(request.year())
+                .description(request.description())
+                .build();
+
+        BookResponse bookResponse = toResponse(bookRepository.save(book));
+
+        URI uri = URI.create("/api/books/book-by-id?id=" + bookResponse.id());
+        return ResponseEntity.created(uri).body(bookResponse);
     }
 
     @Override
-    public ResponseEntity<@NonNull BookResponse> updateBook(BookRequest request, Long id) {
-        Book book = bookRepository.findById(id).orElseThrow(() -> new RuntimeException("Book not found"));
+    public ResponseEntity<BookResponse> updateBook(BookRequest request, Long id) {
 
-        if (validateBook(request)) {
-            book.setTitle(request.title());
-            book.setDescription(request.description());
-            book.setYear(request.year());
-            book.setAuthor(request.author());
+        validateBook(request);
 
-            return ResponseEntity.ok(toResponse(bookRepository.save(book)));
-        } else {
-            return ResponseEntity.badRequest().build();
-        }
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new BookNotFoundException(id));
+
+        book.setTitle(request.title());
+        book.setAuthor(request.author());
+        book.setYear(request.year());
+        book.setDescription(request.description());
+
+        return ResponseEntity.ok(toResponse(bookRepository.save(book)));
     }
 }
