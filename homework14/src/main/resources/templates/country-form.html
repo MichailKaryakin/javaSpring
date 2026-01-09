@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Country form</title>
+</head>
+<body>
+
+<h1>Create / Edit Country</h1>
+
+<form th:action="@{/countries}" th:object="${country}" method="post">
+
+    <div>
+        <label>Country name:</label>
+        <input type="text" th:field="*{name}"/>
+        <div th:if="${#fields.hasErrors('name')}"
+             th:errors="*{name}"></div>
+    </div>
+
+    <div>
+        <label>Population:</label>
+        <input type="number" th:field="*{population}"/>
+        <div th:if="${#fields.hasErrors('population')}"
+             th:errors="*{population}"></div>
+    </div>
+
+    <hr/>
+
+    <h3>Flag</h3>
+
+    <div>
+        <label>Stripes:</label>
+        <input type="number" th:field="*{flag.stripes}"/>
+    </div>
+
+    <div>
+        <label>Colors:</label>
+        <input type="text" th:field="*{flag.colors}" placeholder="red, white, blue"/>
+    </div>
+
+    <div>
+        <label>Ratio:</label>
+        <input type="text" th:field="*{flag.ratio}" placeholder="2:3"/>
+    </div>
+
+    <hr/>
+
+    <h3>Cities</h3>
+
+    <div th:each="city, stat : *{cities}">
+        <div>
+            <label>City name:</label>
+            <input type="text"
+                   th:field="*{cities[__${stat.index}__].name}"/>
+        </div>
+
+        <div>
+            <label>Area:</label>
+            <input type="number"
+                   th:field="*{cities[__${stat.index}__].area}"/>
+        </div>
+
+        <br/>
+    </div>
+
+    <button type="submit">Save</button>
+    <a th:href="@{/countries}">Cancel</a>
+
+</form>
+
+</body>
+</html>

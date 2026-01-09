@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Countries</title>
+</head>
+<body>
+
+<h1>Countries</h1>
+
+<a th:href="@{/countries/new}">➕ Add country</a>
+
+<table border="1" cellpadding="5" cellspacing="0">
+    <thead>
+    <tr>
+        <th>
+            <a th:href="@{/countries(sort='name')}">Name</a>
+        </th>
+        <th>
+            <a th:href="@{/countries(sort='population')}">Population</a>
+        </th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr th:each="country : ${countries.content}">
+        <td th:text="${country.name}"></td>
+        <td th:text="${country.population}"></td>
+        <td>
+            <a th:href="@{/countries/{id}(id=${country.id})}">View</a>
+            |
+            <a th:href="@{/countries/{id}/delete(id=${country.id})}"
+               onclick="return confirm('Delete?')">Delete</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<br/>
+
+<div>
+    <span th:if="${countries.hasPrevious()}">
+        <a th:href="@{/countries(page=${countries.number - 1})}">⬅ Prev</a>
+    </span>
+
+    <span>
+        Page <span th:text="${countries.number + 1}"></span>
+        of <span th:text="${countries.totalPages}"></span>
+    </span>
+
+    <span th:if="${countries.hasNext()}">
+        <a th:href="@{/countries(page=${countries.number + 1})}">Next ➡</a>
+    </span>
+</div>
+
+</body>
+</html>

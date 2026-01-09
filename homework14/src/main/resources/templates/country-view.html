@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Country</title>
+</head>
+<body>
+
+<h1 th:text="${country.name}"></h1>
+
+<p>
+    <strong>Population:</strong>
+    <span th:text="${country.population}"></span>
+</p>
+
+<hr/>
+
+<h3>Flag</h3>
+<ul>
+    <li>Stripes: <span th:text="${country.flag.stripes}"></span></li>
+    <li>Colors: <span th:text="${country.flag.colors}"></span></li>
+    <li>Ratio: <span th:text="${country.flag.ratio}"></span></li>
+</ul>
+
+<hr/>
+
+<h3>Cities</h3>
+
+<table border="1" cellpadding="5">
+    <tr>
+        <th>Name</th>
+        <th>Area</th>
+    </tr>
+
+    <tr th:each="city : ${country.cities}">
+        <td th:text="${city.name}"></td>
+        <td th:text="${city.area}"></td>
+    </tr>
+</table>
+
+<br/>
+
+<a th:href="@{/countries}">⬅ Back</a>
+
+</body>
+</html>
